@@ -255,12 +255,12 @@ def run():
         True) / nr_of_simulations
 
     print("Results after %d simulations:" % nr_of_simulations)
-    print("The probability of BVB winning the CL is %.3f" % probapality_bvb_winning_the_champions_league)
-    print("The probability of the 5th place for Germany is %.3f" % probapality_fith_place_for_germany)
-    print("The probability of Dortmund being 5th in Bundesliga is %.3f" % (simulation_results_dortmund_place.count(5) / nr_of_simulations))
-    print("The probability of Eintracht being 6th in Bundesliga is %.3f" % (simulation_results_eintracht_place.count(6) / nr_of_simulations))
-    print("The probability of Eintracht being 5th in Bundesliga is %.3f" % (simulation_results_eintracht_place.count(5) / nr_of_simulations))
-    print("The conditional probability of Eintracht in CL is %.3f" % probality_eintracht_in_champions_league)
+    print("P Dortmund gewinnt CL:             %.3f" % probapality_bvb_winning_the_champions_league)
+    print("P Deutschland bekommt 5. CL Platz: %.3f" % probapality_fith_place_for_germany)
+    print("P Dortmund wird 5.:                %.3f" % (simulation_results_dortmund_place.count(5) / nr_of_simulations))
+    print("P Eintracht wird 6.:               %.3f" % (simulation_results_eintracht_place.count(6) / nr_of_simulations))
+    print("P Eintracht wird 5.:               %.3f" % (simulation_results_eintracht_place.count(5) / nr_of_simulations))
+    print("P Eintracht kommt in die CL:       %.3f" % probality_eintracht_in_champions_league)
 
 
 def simulate_cup(team1, team2, team3, team4):
