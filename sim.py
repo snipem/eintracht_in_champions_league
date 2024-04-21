@@ -139,7 +139,7 @@ def simulate_bundesliga() -> (int, int):
     top_standing_in_this_list = 4
     standings = {
         RBL: 59.9,
-        BVB: 56.7,
+        BVB: 57.7,
         SGE: 45.4,
         FCA: 39.3,
         HOF: 39.2,
@@ -151,7 +151,7 @@ def simulate_bundesliga() -> (int, int):
         # Leipzig
         Match(RBL, BVB), Match(RBL, HOF), Match(RBL, WER), Match(RBL, SGE),
         # Dortmund
-        Match(BVB, B04), Match(BVB, FCA), Match(BVB, M05), Match(BVB, D98), # Direktes Duell gegen Leipzig
+        Match(BVB, FCA), Match(BVB, M05), Match(BVB, D98), # Direktes Duell gegen Leipzig
         # Eintracht
         Match(SGE, FCB), Match(SGE, B04), Match(SGE, BMG),  # Direktes Duell gegen Leipzig
         # Augsburg
@@ -185,7 +185,7 @@ def simulate_bundesliga() -> (int, int):
 
 
 def run():
-    nr_of_simulations = 100
+    nr_of_simulations = 10000
     i = 0
     simulation_results_cl_winner = []
     simulation_results_fifth_cl_place_for_germany = []
