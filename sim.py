@@ -2,6 +2,7 @@ import locale
 import math
 import random
 import sys
+from datetime import datetime
 
 DRAW = "DRAW"
 
@@ -35,7 +36,6 @@ KOE = "KOE"
 HEI = "HEI"
 BER = "BER"
 
-
 team_ovr_rating = {
     BVB: 81,
     PSG: 83,
@@ -59,6 +59,7 @@ team_ovr_rating = {
     HEI: 74,
     BER: 74,
 }
+
 
 class Match:
 
@@ -99,6 +100,7 @@ class Match:
             else:
                 return False
 
+
 def calculate_outcome_probability(rating1, rating2):
     rating_difference = rating1 - rating2
 
@@ -129,6 +131,7 @@ def calculate_outcome_probability(rating1, rating2):
 
     return win_prob, draw_prob, loss_prob
 
+
 def simulate_match(team1: str, team1_rating: int, team2: str, team2_rating: int):
     win_prob, draw_prob, loss_prob = calculate_outcome_probability(team1_rating, team2_rating)
     outcome = random.choices([team1, 'DRAW', team2], weights=[win_prob, draw_prob, loss_prob])[0]
@@ -136,7 +139,6 @@ def simulate_match(team1: str, team1_rating: int, team2: str, team2_rating: int)
 
 
 def get_random_outcome(team1, team2):
-
     team1_rating = 0
     team2_rating = 0
 
@@ -267,23 +269,38 @@ def simulate_bundesliga() -> (int, int):
     return place_eintracht, place_dortmund
 
 
-def run():
+class SimulationResults:
 
+    def __init__(self, nr_of_simulations):
+        self.start_time = datetime.now()
+        self.nr_of_simulations = nr_of_simulations
+        self.cl_winner = []
+        self.fifth_cl_place_for_germany = []
+        self.eintracht_place = []
+        self.dortmund_place = []
+        self.eintracht_in_champions_league = []
+        self.eintracht_in_europa_league = []
+        self.eintracht_in_conference_league = []
+        self.eintracht_in_europa = []
+
+        self.end_time = None
+        self.duration = None
+
+    def end(self):
+        self.end_time = datetime.now()
+        self.duration = self.end_time - self.start_time
+
+
+def run():
     if len(sys.argv) < 2:
         print("Usage: python sim.py <nr_of_simulations>")
         sys.exit(1)
 
     nr_of_simulations = int(sys.argv[1])
 
+    simulation_results = SimulationResults(nr_of_simulations)
+
     i = 0
-    simulation_results_cl_winner = []
-    simulation_results_fifth_cl_place_for_germany = []
-    simulation_results_eintracht_place = []
-    simulation_results_dortmund_place = []
-    simulation_resutls_eintracht_in_champions_league = []
-    simulation_resutls_eintracht_in_europa_league = []
-    simulation_resutls_eintracht_in_conference_league = []
-    simulation_resutls_eintracht_in_europa = []
 
     debug = False
 
@@ -297,8 +314,6 @@ def run():
 
         cl_winner, points_for_germany_in_cl = simulate_cup(BVB, PSG, FCB, RM)
         points_for_germany += points_for_germany_in_cl
-
-        simulation_results_cl_winner.append(cl_winner)
 
         if debug:
             print(i, cl_winner, points_for_germany)
@@ -324,12 +339,7 @@ def run():
             print("Points for England: %d" % points_for_england)
             print("Germany has 5th CL place: %s" % germany_has_5th_cl_place)
 
-        simulation_results_fifth_cl_place_for_germany.append(germany_has_5th_cl_place)
-
         eintracht_place, dortmund_place = simulate_bundesliga()
-
-        simulation_results_eintracht_place.append(eintracht_place)
-        simulation_results_dortmund_place.append(dortmund_place)
 
         # Setup europa places
         el_place = 5
@@ -361,32 +371,38 @@ def run():
         if eintracht_in_champions_league or eintracht_in_europa_league or eintracht_in_conference_league:
             eintracht_in_europa = True
 
-        simulation_resutls_eintracht_in_champions_league.append(eintracht_in_champions_league)
-        simulation_resutls_eintracht_in_europa_league.append(eintracht_in_europa_league)
-        simulation_resutls_eintracht_in_conference_league.append(eintracht_in_conference_league)
-        simulation_resutls_eintracht_in_europa.append(eintracht_in_europa)
+        simulation_results.cl_winner.append(cl_winner)
 
+        simulation_results.eintracht_place.append(eintracht_place)
+        simulation_results.dortmund_place.append(dortmund_place)
+        simulation_results.fifth_cl_place_for_germany.append(germany_has_5th_cl_place)
 
-    probapality_bvb_winning_the_champions_league = simulation_results_cl_winner.count(BVB) / nr_of_simulations
-    probapality_fith_place_for_germany = simulation_results_fifth_cl_place_for_germany.count(True) / nr_of_simulations
-    probality_eintracht_in_champions_league = simulation_resutls_eintracht_in_champions_league.count(
+        simulation_results.eintracht_in_champions_league.append(eintracht_in_champions_league)
+        simulation_results.eintracht_in_europa_league.append(eintracht_in_europa_league)
+        simulation_results.eintracht_in_conference_league.append(eintracht_in_conference_league)
+        simulation_results.eintracht_in_europa.append(eintracht_in_europa)
+
+    probapality_bvb_winning_the_champions_league = simulation_results.cl_winner.count(BVB) / nr_of_simulations
+    probapality_fith_place_for_germany = simulation_results.fifth_cl_place_for_germany.count(True) / nr_of_simulations
+    probality_eintracht_in_champions_league = simulation_results.eintracht_in_champions_league.count(
         True) / nr_of_simulations
 
-    probability_eintracht_in_europa_league = simulation_resutls_eintracht_in_europa_league.count(True) / nr_of_simulations
-    probability_eintracht_in_conference_league = simulation_resutls_eintracht_in_conference_league.count(True) / nr_of_simulations
-    probability_eintracht_in_europa = simulation_resutls_eintracht_in_europa.count(True) / nr_of_simulations
-
+    probability_eintracht_in_europa_league = simulation_results.eintracht_in_europa_league.count(
+        True) / nr_of_simulations
+    probability_eintracht_in_conference_league = simulation_results.eintracht_in_conference_league.count(
+        True) / nr_of_simulations
+    probability_eintracht_in_europa = simulation_results.eintracht_in_europa.count(True) / nr_of_simulations
 
     print("\n```")
     print("Ergebnisse nach %s Simulationen mit Powerranking:\n" % millify(nr_of_simulations),
           "P BVB gewinnt CL:       %.3f\n" % probapality_bvb_winning_the_champions_league,
           "P DFB mit 5. CL Platz:  %.3f\n" % probapality_fith_place_for_germany,
-          "P BVB wird 5.:          %.3f\n" % (simulation_results_dortmund_place.count(5) / nr_of_simulations),
-          "P SGE wird 5.:          %.3f\n" % (simulation_results_eintracht_place.count(5) / nr_of_simulations),
-          "P SGE wird 6.:          %.3f\n" % (simulation_results_eintracht_place.count(6) / nr_of_simulations),
-          "P SGE wird 7.:          %.3f\n" % (simulation_results_eintracht_place.count(7) / nr_of_simulations),
-          "P SGE wird 8.:          %.3f\n" % (simulation_results_eintracht_place.count(8) / nr_of_simulations),
-          "P SGE wird 9.:          %.3f\n" % (simulation_results_eintracht_place.count(9) / nr_of_simulations),
+          "P BVB wird 5.:          %.3f\n" % (simulation_results.dortmund_place.count(5) / nr_of_simulations),
+          "P SGE wird 5.:          %.3f\n" % (simulation_results.eintracht_place.count(5) / nr_of_simulations),
+          "P SGE wird 6.:          %.3f\n" % (simulation_results.eintracht_place.count(6) / nr_of_simulations),
+          "P SGE wird 7.:          %.3f\n" % (simulation_results.eintracht_place.count(7) / nr_of_simulations),
+          "P SGE wird 8.:          %.3f\n" % (simulation_results.eintracht_place.count(8) / nr_of_simulations),
+          "P SGE wird 9.:          %.3f\n" % (simulation_results.eintracht_place.count(9) / nr_of_simulations),
           "P SGE kommt in die CL:  %.3f\n" % probality_eintracht_in_champions_league,
           "P SGE kommt in die EL:  %.3f\n" % probability_eintracht_in_europa_league,
           "P SGE kommt in die ECL: %.3f\n" % probability_eintracht_in_conference_league,
@@ -394,14 +410,14 @@ def run():
           "```")
 
 
-
 def millify(n):
-    millnames = ['','.000',' Millionen',' Billionen',' Trillionen']
+    millnames = ['', '.000', ' Millionen', ' Billionen', ' Trillionen']
     n = float(n)
-    millidx = max(0,min(len(millnames)-1,
-                        int(math.floor(0 if n == 0 else math.log10(abs(n))/3))))
+    millidx = max(0, min(len(millnames) - 1,
+                         int(math.floor(0 if n == 0 else math.log10(abs(n)) / 3))))
 
-    return '{:.0f}{}'.format(n / 10**(3 * millidx), millnames[millidx])
+    return '{:.0f}{}'.format(n / 10 ** (3 * millidx), millnames[millidx])
+
 
 def simulate_cup(team1, team2, team3, team4):
     points_for_germany = 0
