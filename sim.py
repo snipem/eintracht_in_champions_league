@@ -1,3 +1,5 @@
+import locale
+import math
 import random
 import sys
 
@@ -33,6 +35,30 @@ KOE = "KOE"
 HEI = "HEI"
 BER = "BER"
 
+
+team_ovr_rating = {
+    BVB: 81,
+    PSG: 83,
+    FCB: 84,
+    RM: 85,
+    B04: 80,
+    AST: 80,
+    RBL: 80,
+    HOF: 76,
+    WER: 74,
+    SGE: 76,
+    FCA: 74,
+    M05: 72,
+    D98: 71,
+    BMG: 75,
+    VFB: 78,
+    BOC: 73,
+    SCF: 76,
+    WOB: 74,
+    KOE: 72,
+    HEI: 74,
+    BER: 74,
+}
 
 class Match:
 
@@ -73,10 +99,64 @@ class Match:
             else:
                 return False
 
+def calculate_outcome_probability(rating1, rating2):
+    rating_difference = rating1 - rating2
+
+    # Define base probabilities for win, draw, and loss
+    base_win_prob = 0.375
+    base_draw_prob = 0.25
+    base_loss_prob = 0.375
+
+    # Adjust probabilities based on rating difference
+    if rating_difference > 0:
+        win_prob = base_win_prob + (rating_difference * 0.03)
+        draw_prob = base_draw_prob - (rating_difference * 0.005)
+        loss_prob = base_loss_prob - (rating_difference * 0.005)
+    elif rating_difference < 0:
+        win_prob = base_win_prob - (abs(rating_difference) * 0.03)
+        draw_prob = base_draw_prob + (abs(rating_difference) * 0.005)
+        loss_prob = base_loss_prob + (abs(rating_difference) * 0.005)
+    else:
+        win_prob = base_win_prob
+        draw_prob = base_draw_prob
+        loss_prob = base_loss_prob
+
+    # Ensure probabilities sum up to 1
+    total_prob = win_prob + draw_prob + loss_prob
+    win_prob /= total_prob
+    draw_prob /= total_prob
+    loss_prob /= total_prob
+
+    return win_prob, draw_prob, loss_prob
+
+def simulate_match(team1: str, team1_rating: int, team2: str, team2_rating: int):
+    win_prob, draw_prob, loss_prob = calculate_outcome_probability(team1_rating, team2_rating)
+    outcome = random.choices([team1, 'DRAW', team2], weights=[win_prob, draw_prob, loss_prob])[0]
+    return outcome
+
 
 def get_random_outcome(team1, team2):
-    possible_outcomes = [DRAW, team1, team2]
-    return possible_outcomes[random.randint(0, 2)]
+
+    team1_rating = 0
+    team2_rating = 0
+
+    if team1 in team_ovr_rating:
+        team1_rating = team_ovr_rating[team1]
+
+    if team2 in team_ovr_rating:
+        team2_rating = team_ovr_rating[team2]
+
+    # Use the same rating if either one is 0
+    if team1_rating == 0 and team2_rating == 0:
+        team1_rating = 70
+        team2_rating = 70
+    elif team1_rating == 0:
+        team1_rating = team2_rating
+    elif team2_rating == 0:
+        team2_rating = team1_rating
+
+    outcome = simulate_match(team1, team1_rating, team2, team2_rating)
+    return outcome
 
 
 def is_german_team(team):
@@ -291,17 +371,33 @@ def run():
     probability_eintracht_in_europa = simulation_resutls_eintracht_in_europa.count(True) / nr_of_simulations
 
 
-    print("Results after %d simulations:" % nr_of_simulations)
-    print("P Dortmund gewinnt CL:             %.3f" % probapality_bvb_winning_the_champions_league)
-    print("P Deutschland bekommt 5. CL Platz: %.3f" % probapality_fith_place_for_germany)
-    print("P Dortmund wird 5.:                %.3f" % (simulation_results_dortmund_place.count(5) / nr_of_simulations))
-    print("P Eintracht wird 6.:               %.3f" % (simulation_results_eintracht_place.count(6) / nr_of_simulations))
-    # print("P Eintracht wird 5.:               %.3f" % (simulation_results_eintracht_place.count(5) / nr_of_simulations))
-    print("P Eintracht kommt in die CL:       %.3f" % probality_eintracht_in_champions_league)
-    print("P Eintracht kommt in die EL:       %.3f" % probability_eintracht_in_europa_league)
-    print("P Eintracht kommt in die ECL       %.3f" % probability_eintracht_in_conference_league)
-    print("P Europacup im nächsten Jahr:      %.3f" % probability_eintracht_in_europa)
+    print("")
+    print("```")
+    print("Ergebnisse nach %s Simulationen mit Powerranking:" % millify(nr_of_simulations))
+    print("")
+    print("P BVB gewinnt CL:       %.3f" % probapality_bvb_winning_the_champions_league)
+    print("P DFB mit 5. CL Platz:  %.3f" % probapality_fith_place_for_germany)
+    print("P BVB wird 5.:          %.3f" % (simulation_results_dortmund_place.count(5) / nr_of_simulations))
+    print("P SGE wird 5.:          %.3f" % (simulation_results_eintracht_place.count(5) / nr_of_simulations))
+    print("P SGE wird 6.:          %.3f" % (simulation_results_eintracht_place.count(6) / nr_of_simulations))
+    print("P SGE wird 7.:          %.3f" % (simulation_results_eintracht_place.count(7) / nr_of_simulations))
+    print("P SGE wird 8.:          %.3f" % (simulation_results_eintracht_place.count(8) / nr_of_simulations))
+    print("P SGE wird 9.:          %.3f" % (simulation_results_eintracht_place.count(9) / nr_of_simulations))
+    print("P SGE kommt in die CL:  %.3f" % probality_eintracht_in_champions_league)
+    print("P SGE kommt in die EL:  %.3f" % probability_eintracht_in_europa_league)
+    print("P SGE kommt in die ECL: %.3f" % probability_eintracht_in_conference_league)
+    print("P SGE in Europa 24/25:  %.3f" % probability_eintracht_in_europa)
+    print("```")
 
+
+
+def millify(n):
+    millnames = ['','.000',' Millionen',' Billionen',' Trillionen']
+    n = float(n)
+    millidx = max(0,min(len(millnames)-1,
+                        int(math.floor(0 if n == 0 else math.log10(abs(n))/3))))
+
+    return '{:.0f}{}'.format(n / 10**(3 * millidx), millnames[millidx])
 
 def simulate_cup(team1, team2, team3, team4):
     points_for_germany = 0
