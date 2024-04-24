@@ -1,8 +1,10 @@
+import json
 import locale
 import math
 import random
+import subprocess
 import sys
-from datetime import datetime
+from datetime import datetime, timedelta
 
 DRAW = "DRAW"
 
@@ -177,6 +179,10 @@ def is_english_team(team):
         return False
 
 
+def get_git_revision_short_hash() -> str:
+    return subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()
+
+
 def who_goes_to_next_round(m1, m2):
     if m1.outcome == DRAW and m2.outcome == DRAW:
         return m2.overtime_winner
@@ -269,11 +275,8 @@ def simulate_bundesliga() -> (int, int):
     return place_eintracht, place_dortmund
 
 
-class SimulationResults:
-
-    def __init__(self, nr_of_simulations):
-        self.start_time = datetime.now()
-        self.nr_of_simulations = nr_of_simulations
+class SimulationRawData:
+    def __init__(self):
         self.cl_winner = []
         self.fifth_cl_place_for_germany = []
         self.eintracht_place = []
@@ -283,6 +286,28 @@ class SimulationResults:
         self.eintracht_in_conference_league = []
         self.eintracht_in_europa = []
 
+
+class SimulationResults:
+
+    def __init__(self, nr_of_simulations, description=""):
+
+        self.probability_eintracht_in_europa = 0
+        self.probability_eintracht_in_conference_league = 0
+        self.probability_eintracht_in_europa_league = 0
+        self.probability_eintracht_in_champions_league = 0
+        self.probability_fifth_cl_starter_for_germany = 0
+        self.probability_bvb_winning_the_champions_league = 0
+        self.probability_eintracht_place = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0, 11: 0, 12: 0,
+                                            13: 0, 14: 0, 15: 0, 16: 0, 17: 0, 18: 0}
+        self.probability_dortmund_place = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0, 11: 0, 12: 0,
+                                           13: 0, 14: 0, 15: 0, 16: 0, 17: 0, 18: 0}
+
+        self.start_time = datetime.now()
+        self.revision = get_git_revision_short_hash()
+        self.description = description
+
+        self.nr_of_simulations = nr_of_simulations
+
         self.end_time = None
         self.duration = None
 
@@ -290,15 +315,77 @@ class SimulationResults:
         self.end_time = datetime.now()
         self.duration = self.end_time - self.start_time
 
+    def to_json(self):
+        data = self.__dict__.copy()
+        data['start_time'] = self.start_time.isoformat()
+        data['end_time'] = self.end_time.isoformat() if self.end_time else None
+        data['duration'] = self.duration.total_seconds() if self.duration else None
+        return json.dumps(data)
+
+    @classmethod
+    def from_json(cls, json_string):
+        data = json.loads(json_string)
+        obj = cls(data['nr_of_simulations'])
+        obj.__dict__.update(data)
+        obj.start_time = datetime.fromisoformat(data['start_time'])
+        obj.end_time = datetime.fromisoformat(data['end_time']) if data['end_time'] else None
+        obj.duration = timedelta(seconds=data['duration']) if data['duration'] else None
+        return obj
+
+    def calculate_probabilities(self, raw_data: SimulationRawData):
+        self.probability_bvb_winning_the_champions_league = raw_data.cl_winner.count(BVB) / self.nr_of_simulations
+        self.probability_fifth_cl_starter_for_germany = raw_data.fifth_cl_place_for_germany.count(
+            True) / self.nr_of_simulations
+        self.probability_eintracht_in_champions_league = raw_data.eintracht_in_champions_league.count(
+            True) / self.nr_of_simulations
+
+        self.probability_eintracht_in_europa_league = raw_data.eintracht_in_europa_league.count(
+            True) / self.nr_of_simulations
+        self.probability_eintracht_in_conference_league = raw_data.eintracht_in_conference_league.count(
+            True) / self.nr_of_simulations
+        self.probability_eintracht_in_europa = raw_data.eintracht_in_europa.count(True) / self.nr_of_simulations
+
+        for i in range(1, 18):
+            self.probability_eintracht_place[i] = raw_data.eintracht_place.count(i) / self.nr_of_simulations
+
+        for i in range(1, 18):
+            self.probability_dortmund_place[i] = raw_data.dortmund_place.count(i) / self.nr_of_simulations
+
+    def to_string(self):
+        rs = ""
+        rs += "\n```"
+        rs += ("Ergebnisse nach %s Simulationen mit Powerranking:\n" % millify(self.nr_of_simulations) +
+               "P BVB gewinnt CL:       %.3f\n" % self.probability_bvb_winning_the_champions_league +
+               "P DFB mit 5. CL Platz:  %.3f\n" % self.probability_fifth_cl_starter_for_germany +
+               "P BVB wird 5.:          %.3f\n" % self.probability_dortmund_place[5] +
+               "P SGE wird 5.:          %.3f\n" % self.probability_eintracht_place[5] +
+               "P SGE wird 6.:          %.3f\n" % self.probability_eintracht_place[6] +
+               "P SGE wird 7.:          %.3f\n" % self.probability_eintracht_place[7] +
+               "P SGE wird 8.:          %.3f\n" % self.probability_eintracht_place[8] +
+               "P SGE wird 9.:          %.3f\n" % self.probability_eintracht_place[9] +
+               "P SGE kommt in die CL:  %.3f\n" % self.probability_eintracht_in_champions_league +
+               "P SGE kommt in die EL:  %.3f\n" % self.probability_eintracht_in_europa_league +
+               "P SGE kommt in die ECL: %.3f\n" % self.probability_eintracht_in_conference_league +
+               "P SGE in Europa 24/25:  %.3f\n" % self.probability_eintracht_in_europa +
+               "```")
+
+        return rs
+
 
 def run():
     if len(sys.argv) < 2:
-        print("Usage: python sim.py <nr_of_simulations>")
+        print("Usage: python sim.py <nr_of_simulations> <optional_description>")
         sys.exit(1)
+
+    if len(sys.argv) == 3:
+        description = sys.argv[2]
+    else:
+        description = ""
 
     nr_of_simulations = int(sys.argv[1])
 
-    simulation_results = SimulationResults(nr_of_simulations)
+    simulation_results = SimulationResults(nr_of_simulations, description)
+    raw_data = SimulationRawData()
 
     i = 0
 
@@ -371,43 +458,29 @@ def run():
         if eintracht_in_champions_league or eintracht_in_europa_league or eintracht_in_conference_league:
             eintracht_in_europa = True
 
-        simulation_results.cl_winner.append(cl_winner)
+        raw_data.cl_winner.append(cl_winner)
 
-        simulation_results.eintracht_place.append(eintracht_place)
-        simulation_results.dortmund_place.append(dortmund_place)
-        simulation_results.fifth_cl_place_for_germany.append(germany_has_5th_cl_place)
+        raw_data.eintracht_place.append(eintracht_place)
+        raw_data.dortmund_place.append(dortmund_place)
+        raw_data.fifth_cl_place_for_germany.append(germany_has_5th_cl_place)
 
-        simulation_results.eintracht_in_champions_league.append(eintracht_in_champions_league)
-        simulation_results.eintracht_in_europa_league.append(eintracht_in_europa_league)
-        simulation_results.eintracht_in_conference_league.append(eintracht_in_conference_league)
-        simulation_results.eintracht_in_europa.append(eintracht_in_europa)
+        raw_data.eintracht_in_champions_league.append(eintracht_in_champions_league)
+        raw_data.eintracht_in_europa_league.append(eintracht_in_europa_league)
+        raw_data.eintracht_in_conference_league.append(eintracht_in_conference_league)
+        raw_data.eintracht_in_europa.append(eintracht_in_europa)
 
-    probapality_bvb_winning_the_champions_league = simulation_results.cl_winner.count(BVB) / nr_of_simulations
-    probapality_fith_place_for_germany = simulation_results.fifth_cl_place_for_germany.count(True) / nr_of_simulations
-    probality_eintracht_in_champions_league = simulation_results.eintracht_in_champions_league.count(
-        True) / nr_of_simulations
+    simulation_results.end()
+    simulation_results.calculate_probabilities(raw_data)
+    print(simulation_results.to_string())
 
-    probability_eintracht_in_europa_league = simulation_results.eintracht_in_europa_league.count(
-        True) / nr_of_simulations
-    probability_eintracht_in_conference_league = simulation_results.eintracht_in_conference_league.count(
-        True) / nr_of_simulations
-    probability_eintracht_in_europa = simulation_results.eintracht_in_europa.count(True) / nr_of_simulations
+    # Serialize to JSON
+    json_data = simulation_results.to_json()
+    filename = "results/sim_result_%s_%s.json" % (simulation_results.start_time, simulation_results.revision)
+    with open(filename, "w") as text_file:
+        text_file.write(json_data)
 
-    print("\n```")
-    print("Ergebnisse nach %s Simulationen mit Powerranking:\n" % millify(nr_of_simulations),
-          "P BVB gewinnt CL:       %.3f\n" % probapality_bvb_winning_the_champions_league,
-          "P DFB mit 5. CL Platz:  %.3f\n" % probapality_fith_place_for_germany,
-          "P BVB wird 5.:          %.3f\n" % (simulation_results.dortmund_place.count(5) / nr_of_simulations),
-          "P SGE wird 5.:          %.3f\n" % (simulation_results.eintracht_place.count(5) / nr_of_simulations),
-          "P SGE wird 6.:          %.3f\n" % (simulation_results.eintracht_place.count(6) / nr_of_simulations),
-          "P SGE wird 7.:          %.3f\n" % (simulation_results.eintracht_place.count(7) / nr_of_simulations),
-          "P SGE wird 8.:          %.3f\n" % (simulation_results.eintracht_place.count(8) / nr_of_simulations),
-          "P SGE wird 9.:          %.3f\n" % (simulation_results.eintracht_place.count(9) / nr_of_simulations),
-          "P SGE kommt in die CL:  %.3f\n" % probality_eintracht_in_champions_league,
-          "P SGE kommt in die EL:  %.3f\n" % probability_eintracht_in_europa_league,
-          "P SGE kommt in die ECL: %.3f\n" % probability_eintracht_in_conference_league,
-          "P SGE in Europa 24/25:  %.3f\n" % probability_eintracht_in_europa,
-          "```")
+    # # Deserialize from JSON
+    # sim_results_deserialized = SimulationResults.from_json(json_data)
 
 
 def millify(n):
