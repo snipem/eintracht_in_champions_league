@@ -268,7 +268,13 @@ def simulate_bundesliga() -> (int, int):
 
 
 def run():
-    nr_of_simulations = 100000
+
+    if len(sys.argv) < 2:
+        print("Usage: python sim.py <nr_of_simulations>")
+        sys.exit(1)
+
+    nr_of_simulations = int(sys.argv[1])
+
     i = 0
     simulation_results_cl_winner = []
     simulation_results_fifth_cl_place_for_germany = []
@@ -371,23 +377,21 @@ def run():
     probability_eintracht_in_europa = simulation_resutls_eintracht_in_europa.count(True) / nr_of_simulations
 
 
-    print("")
-    print("```")
-    print("Ergebnisse nach %s Simulationen mit Powerranking:" % millify(nr_of_simulations))
-    print("")
-    print("P BVB gewinnt CL:       %.3f" % probapality_bvb_winning_the_champions_league)
-    print("P DFB mit 5. CL Platz:  %.3f" % probapality_fith_place_for_germany)
-    print("P BVB wird 5.:          %.3f" % (simulation_results_dortmund_place.count(5) / nr_of_simulations))
-    print("P SGE wird 5.:          %.3f" % (simulation_results_eintracht_place.count(5) / nr_of_simulations))
-    print("P SGE wird 6.:          %.3f" % (simulation_results_eintracht_place.count(6) / nr_of_simulations))
-    print("P SGE wird 7.:          %.3f" % (simulation_results_eintracht_place.count(7) / nr_of_simulations))
-    print("P SGE wird 8.:          %.3f" % (simulation_results_eintracht_place.count(8) / nr_of_simulations))
-    print("P SGE wird 9.:          %.3f" % (simulation_results_eintracht_place.count(9) / nr_of_simulations))
-    print("P SGE kommt in die CL:  %.3f" % probality_eintracht_in_champions_league)
-    print("P SGE kommt in die EL:  %.3f" % probability_eintracht_in_europa_league)
-    print("P SGE kommt in die ECL: %.3f" % probability_eintracht_in_conference_league)
-    print("P SGE in Europa 24/25:  %.3f" % probability_eintracht_in_europa)
-    print("```")
+    print("\n```")
+    print("Ergebnisse nach %s Simulationen mit Powerranking:\n" % millify(nr_of_simulations),
+          "P BVB gewinnt CL:       %.3f\n" % probapality_bvb_winning_the_champions_league,
+          "P DFB mit 5. CL Platz:  %.3f\n" % probapality_fith_place_for_germany,
+          "P BVB wird 5.:          %.3f\n" % (simulation_results_dortmund_place.count(5) / nr_of_simulations),
+          "P SGE wird 5.:          %.3f\n" % (simulation_results_eintracht_place.count(5) / nr_of_simulations),
+          "P SGE wird 6.:          %.3f\n" % (simulation_results_eintracht_place.count(6) / nr_of_simulations),
+          "P SGE wird 7.:          %.3f\n" % (simulation_results_eintracht_place.count(7) / nr_of_simulations),
+          "P SGE wird 8.:          %.3f\n" % (simulation_results_eintracht_place.count(8) / nr_of_simulations),
+          "P SGE wird 9.:          %.3f\n" % (simulation_results_eintracht_place.count(9) / nr_of_simulations),
+          "P SGE kommt in die CL:  %.3f\n" % probality_eintracht_in_champions_league,
+          "P SGE kommt in die EL:  %.3f\n" % probability_eintracht_in_europa_league,
+          "P SGE kommt in die ECL: %.3f\n" % probability_eintracht_in_conference_league,
+          "P SGE in Europa 24/25:  %.3f\n" % probability_eintracht_in_europa,
+          "```")
 
 
 
