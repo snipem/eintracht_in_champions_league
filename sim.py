@@ -151,17 +151,18 @@ def simulate_bundesliga() -> (int, int):
         # Leipzig
         Match(RBL, BVB), Match(RBL, HOF), Match(RBL, WER), Match(RBL, SGE),
         # Dortmund
-        Match(BVB, FCA), Match(BVB, M05), Match(BVB, D98), # Direktes Duell gegen Leipzig
+        Match(BVB, FCA), Match(BVB, M05), Match(BVB, D98),  # Direktes Duell gegen Leipzig
         # Eintracht
         Match(SGE, FCB), Match(SGE, B04), Match(SGE, BMG),  # Direktes Duell gegen Leipzig
         # Augsburg
-        Match(FCA, WER), Match(FCA, VFB), Match(FCA, B04), # Direktes Duell gegen Dortmund
+        Match(FCA, WER), Match(FCA, VFB), Match(FCA, B04),  # Direktes Duell gegen Dortmund
         # Hoffenheim
-        Match(HOF, BOC), Match(HOF, D98), Match(HOF, FCB), # Direktes Duell gegen Leipzig
+        Match(HOF, BOC), Match(HOF, D98), Match(HOF, FCB),  # Direktes Duell gegen Leipzig
         # Freiburg
         Match(SCF, M05), Match(SCF, WOB), Match(SCF, KOE), Match(SCF, HEI), Match(SCF, BER)
     ]
 
+    # Get Points for matches
     for match in matches:
         for team in standings:
 
@@ -172,8 +173,10 @@ def simulate_bundesliga() -> (int, int):
             elif match.is_lose_of_team(team):
                 pass
 
-    sorted_standings = sorted(standings.items(), key=lambda x:x[1])
+    sorted_standings = sorted(standings.items(), key=lambda x: x[1])
     sorted_standings.reverse()
+
+    # print(sorted_standings)
 
     for sorted_standing in sorted_standings:
         if sorted_standing[0] == BVB:
@@ -185,19 +188,23 @@ def simulate_bundesliga() -> (int, int):
 
 
 def run():
-    nr_of_simulations = 10000
+    nr_of_simulations = 100000
     i = 0
     simulation_results_cl_winner = []
     simulation_results_fifth_cl_place_for_germany = []
     simulation_results_eintracht_place = []
     simulation_results_dortmund_place = []
     simulation_resutls_eintracht_in_champions_league = []
+    simulation_resutls_eintracht_in_europa_league = []
+    simulation_resutls_eintracht_in_conference_league = []
+    simulation_resutls_eintracht_in_europa = []
+
     debug = False
 
     while i < nr_of_simulations:
 
         if i % 1000 == 0:
-            print(i, "/", nr_of_simulations)
+            print("%d/%d  [%0.f%%]\r" % (i, nr_of_simulations, i / nr_of_simulations * 100), end="")
 
         points_for_germany = 0
         points_for_england = 0
@@ -238,29 +245,62 @@ def run():
         simulation_results_eintracht_place.append(eintracht_place)
         simulation_results_dortmund_place.append(dortmund_place)
 
+        # Setup europa places
+        el_place = 5
+        ecl_place = 6
+
+        if cl_winner == BVB and germany_has_5th_cl_place and dortmund_place >= 5:
+            el_place += 2
+            ecl_place += 2
+        elif germany_has_5th_cl_place:
+            el_place += 1
+            ecl_place += 1
+
+        eintracht_in_champions_league = False
+        eintracht_in_europa_league = False
+        eintracht_in_conference_league = False
+        eintracht_in_europa = False
+
         if cl_winner == BVB and germany_has_5th_cl_place and eintracht_place == 6 and dortmund_place == 5:
             eintracht_in_champions_league = True
         elif eintracht_place <= 4:
             eintracht_in_champions_league = True
         elif germany_has_5th_cl_place and eintracht_place == 5:
             eintracht_in_champions_league = True
-        else:
-            eintracht_in_champions_league = False
+        elif eintracht_place <= el_place:
+            eintracht_in_europa_league = True
+        elif eintracht_place <= ecl_place:
+            eintracht_in_conference_league = True
+
+        if eintracht_in_champions_league or eintracht_in_europa_league or eintracht_in_conference_league:
+            eintracht_in_europa = True
 
         simulation_resutls_eintracht_in_champions_league.append(eintracht_in_champions_league)
+        simulation_resutls_eintracht_in_europa_league.append(eintracht_in_europa_league)
+        simulation_resutls_eintracht_in_conference_league.append(eintracht_in_conference_league)
+        simulation_resutls_eintracht_in_europa.append(eintracht_in_europa)
+
 
     probapality_bvb_winning_the_champions_league = simulation_results_cl_winner.count(BVB) / nr_of_simulations
     probapality_fith_place_for_germany = simulation_results_fifth_cl_place_for_germany.count(True) / nr_of_simulations
     probality_eintracht_in_champions_league = simulation_resutls_eintracht_in_champions_league.count(
         True) / nr_of_simulations
 
+    probability_eintracht_in_europa_league = simulation_resutls_eintracht_in_europa_league.count(True) / nr_of_simulations
+    probability_eintracht_in_conference_league = simulation_resutls_eintracht_in_conference_league.count(True) / nr_of_simulations
+    probability_eintracht_in_europa = simulation_resutls_eintracht_in_europa.count(True) / nr_of_simulations
+
+
     print("Results after %d simulations:" % nr_of_simulations)
     print("P Dortmund gewinnt CL:             %.3f" % probapality_bvb_winning_the_champions_league)
     print("P Deutschland bekommt 5. CL Platz: %.3f" % probapality_fith_place_for_germany)
     print("P Dortmund wird 5.:                %.3f" % (simulation_results_dortmund_place.count(5) / nr_of_simulations))
     print("P Eintracht wird 6.:               %.3f" % (simulation_results_eintracht_place.count(6) / nr_of_simulations))
-    print("P Eintracht wird 5.:               %.3f" % (simulation_results_eintracht_place.count(5) / nr_of_simulations))
+    # print("P Eintracht wird 5.:               %.3f" % (simulation_results_eintracht_place.count(5) / nr_of_simulations))
     print("P Eintracht kommt in die CL:       %.3f" % probality_eintracht_in_champions_league)
+    print("P Eintracht kommt in die EL:       %.3f" % probability_eintracht_in_europa_league)
+    print("P Eintracht kommt in die ECL       %.3f" % probability_eintracht_in_conference_league)
+    print("P Europacup im nächsten Jahr:      %.3f" % probability_eintracht_in_europa)
 
 
 def simulate_cup(team1, team2, team3, team4):
