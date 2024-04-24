@@ -290,7 +290,7 @@ def run():
     while i < nr_of_simulations:
 
         if i % 1000 == 0:
-            print("%d/%d  [%0.f%%]\r" % (i, nr_of_simulations, i / nr_of_simulations * 100), end="")
+            print("%d/%d  [%0.f%%]\n" % (i, nr_of_simulations, i / nr_of_simulations * 100), end="")
 
         points_for_germany = 0
         points_for_england = 0
