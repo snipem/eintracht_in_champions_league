@@ -287,6 +287,7 @@ class SimulationRawData:
         self.eintracht_in_europa = []
 
 
+
 class SimulationResults:
 
     def __init__(self, nr_of_simulations, description=""):
@@ -370,6 +371,56 @@ class SimulationResults:
                "```")
 
         return rs
+
+    def format(self, diff=None):
+        # return _format_probability(self, "probability_bvb_winning_the_champions_league", diff)
+        rs = ""
+        rs += "\n```\n"
+        rs += "Ergebnisse nach %s Simulationen mit Powerranking:\n" % millify(self.nr_of_simulations)
+        rs += "Lauf '%s' vom %s\n" % (self.description, self.start_time.strftime("%d.%m. %H:%M"))
+
+        if diff:
+            rs += "Vergleich '%s' vom %s\n" % (diff.description, diff.start_time.strftime("%d.%m. %H:%M"))
+
+
+        rs += ("\nP BVB gewinnt CL:       " + _format_probability(self, "probability_bvb_winning_the_champions_league", diff) +
+              "\nP DFB mit 5. CL Platz:  " + _format_probability(self, "probability_fifth_cl_starter_for_germany", diff) +
+              "\nP BVB wird 5.:          " + _format_probability(self, ["probability_dortmund_place",5], diff) +
+              "\nP SGE wird 5.:          " + _format_probability(self, ["probability_eintracht_place",5], diff) +
+              "\nP SGE wird 6.:          " + _format_probability(self, ["probability_eintracht_place",6], diff) +
+              "\nP SGE wird 7.:          " + _format_probability(self, ["probability_eintracht_place",7], diff) +
+              "\nP SGE wird 8.:          " + _format_probability(self, ["probability_eintracht_place",8], diff) +
+              "\nP SGE wird 9.:          " + _format_probability(self, ["probability_eintracht_place",9], diff) +
+              "\nP SGE kommt in die CL:  " + _format_probability(self, "probability_eintracht_in_champions_league", diff) +
+              "\nP SGE kommt in die EL:  " + _format_probability(self, "probability_eintracht_in_europa_league", diff) +
+              "\nP SGE kommt in die ECL: " + _format_probability(self, "probability_eintracht_in_conference_league", diff) +
+              "\nP SGE in Europa 24/25:  " + _format_probability(self, "probability_eintracht_in_europa", diff) +
+              "\n```")
+        return rs
+
+def _format_probability(sr: SimulationResults, param, compare_sr: SimulationResults = None):
+
+    if isinstance(param, list):
+        if compare_sr:
+
+            diff_value = sr.__dict__[param[0]][param[1]] - compare_sr.__dict__[param[0]][param[1]]
+
+            if diff_value != 0:
+                return "%.1f%% (%.1f%%)" % (sr.__dict__[param[0]][param[1]]*100, 100*(diff_value))
+            else:
+                return "%.1f%%" % (sr.__dict__[param[0]][param[1]]*100)
+        else:
+            return "%.1f%%" % (sr.__dict__[param[0]][param[1]]*100)
+
+
+    if compare_sr:
+        diff_value = 100*(sr.__dict__[param] - compare_sr.__dict__[param])
+        if diff_value != 0:
+            return "%.1f%% (%.1f%%)" % (sr.__dict__[param]*100, diff_value)
+        else:
+            return "%.1f%%" % (sr.__dict__[param]*100)
+    else:
+        return "%.1f%%" % (sr.__dict__[param]*100)
 
 
 def run():
