@@ -371,25 +371,6 @@ class SimulationResults:
         for i in range(1, 18):
             self.probability_dortmund_place[i] = raw_data.dortmund_place.count(i) / self.nr_of_simulations
 
-    def to_string(self):
-        rs = ""
-        rs += "\n```"
-        rs += ("Ergebnisse nach %s Simulationen mit Powerranking:\n" % millify(self.nr_of_simulations) +
-               "P BVB gewinnt CL: %.3f\n" % self.probability_bvb_winning_the_champions_league +
-               "P 5. CL Platz:     %.3f\n" % self.probability_fifth_cl_starter_for_germany +
-               "P BVB wird 5.:     %.3f\n" % self.probability_dortmund_place[5] +
-               "P SGE wird 5.:     %.3f\n" % self.probability_eintracht_place[5] +
-               "P SGE wird 6.:     %.3f\n" % self.probability_eintracht_place[6] +
-               "P SGE wird 7.:     %.3f\n" % self.probability_eintracht_place[7] +
-               "P SGE wird 8.:     %.3f\n" % self.probability_eintracht_place[8] +
-               "P SGE wird 9.:     %.3f\n" % self.probability_eintracht_place[9] +
-               "P SGE in CL:       %.3f\n" % self.probability_eintracht_in_champions_league +
-               "P SGE in EL:       %.3f\n" % self.probability_eintracht_in_europa_league +
-               "P SGE in ECL:      %.3f\n" % self.probability_eintracht_in_conference_league +
-               "P Europacup 24/25: %.3f\n" % self.probability_eintracht_in_europa +
-               "```")
-
-        return rs
 
     def format(self, diff=None):
         # return _format_probability(self, "probability_bvb_winning_the_champions_league", diff)
@@ -402,18 +383,18 @@ class SimulationResults:
             rs += "Vergleich '%s' vom %s\n" % (diff.description, diff.start_time.strftime("%d.%m. %H:%M"))
 
 
-        rs += ("\nP BVB gewinnt CL:       " + _format_probability(self, "probability_bvb_winning_the_champions_league", diff) +
-              "\nP DFB mit 5. CL Platz:  " + _format_probability(self, "probability_fifth_cl_starter_for_germany", diff) +
-              "\nP BVB wird 5.:          " + _format_probability(self, ["probability_dortmund_place",5], diff) +
-              "\nP SGE wird 5.:          " + _format_probability(self, ["probability_eintracht_place",5], diff) +
-              "\nP SGE wird 6.:          " + _format_probability(self, ["probability_eintracht_place",6], diff) +
-              "\nP SGE wird 7.:          " + _format_probability(self, ["probability_eintracht_place",7], diff) +
-              "\nP SGE wird 8.:          " + _format_probability(self, ["probability_eintracht_place",8], diff) +
-              "\nP SGE wird 9.:          " + _format_probability(self, ["probability_eintracht_place",9], diff) +
-              "\nP SGE kommt in die CL:  " + _format_probability(self, "probability_eintracht_in_champions_league", diff) +
-              "\nP SGE kommt in die EL:  " + _format_probability(self, "probability_eintracht_in_europa_league", diff) +
-              "\nP SGE kommt in die ECL: " + _format_probability(self, "probability_eintracht_in_conference_league", diff) +
-              "\nP SGE in Europa 24/25:  " + _format_probability(self, "probability_eintracht_in_europa", diff) +
+        rs += ("\nP BVB gewinnt CL: " + _format_probability(self, "probability_bvb_winning_the_champions_league", diff) +
+              "\nP 5. CL Platz:     " + _format_probability(self, "probability_fifth_cl_starter_for_germany", diff) +
+              "\nP BVB wird 5.:     " + _format_probability(self, ["probability_dortmund_place",5], diff) +
+              "\nP SGE wird 5.:     " + _format_probability(self, ["probability_eintracht_place",5], diff) +
+              "\nP SGE wird 6.:     " + _format_probability(self, ["probability_eintracht_place",6], diff) +
+              "\nP SGE wird 7.:     " + _format_probability(self, ["probability_eintracht_place",7], diff) +
+              "\nP SGE wird 8.:     " + _format_probability(self, ["probability_eintracht_place",8], diff) +
+              "\nP SGE wird 9.:     " + _format_probability(self, ["probability_eintracht_place",9], diff) +
+              "\nP SGE in CL:       " + _format_probability(self, "probability_eintracht_in_champions_league", diff) +
+              "\nP SGE in EL:       " + _format_probability(self, "probability_eintracht_in_europa_league", diff) +
+              "\nP SGE in ECL:      " + _format_probability(self, "probability_eintracht_in_conference_league", diff) +
+              "\nP Europacup 24/25: " + _format_probability(self, "probability_eintracht_in_europa", diff) +
               "\n```")
         return rs
 
