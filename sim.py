@@ -252,7 +252,7 @@ def simulate_bundesliga() -> (int, int):
         # Augsburg
         Match(FCA, WER), Match(FCA, VFB), Match(FCA, B04),  # Direktes Duell gegen Dortmund
         # Hoffenheim
-        Match(HOF, BOC), Match(HOF, D98), Match(HOF, FCB),  # Direktes Duell gegen Leipzig
+        Match(HOF, BOC, outcome=BOC), Match(HOF, D98), Match(HOF, FCB),  # Direktes Duell gegen Leipzig
         # Freiburg
         Match(SCF, M05, outcome=DRAW), Match(SCF, WOB), Match(SCF, KOE), Match(SCF, HEI), Match(SCF, BER)
     ]
