@@ -400,7 +400,7 @@ class SimulationResults:
 
 
 def diff_value_relevant(diff_value: float) -> bool:
-    if abs(diff_value) <= 0.25:
+    if abs(diff_value) <= 0.05:
         return False
 
     return True
@@ -411,7 +411,7 @@ def _format_probability(sr: SimulationResults, param, compare_sr: SimulationResu
     if isinstance(param, list):
         if compare_sr:
 
-            diff_value = sr.__dict__[param[0]][param[1]] - compare_sr.__dict__[param[0]][param[1]]
+            diff_value = 100*(sr.__dict__[param[0]][param[1]] - compare_sr.__dict__[param[0]][param[1]])
 
             if diff_value_relevant(diff_value):
 
