@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from sim import simulate_match, SimulationResults
+from sim import simulate_match, SimulationResults, diff_value_relevant
 
 
 class Test(TestCase):
@@ -33,7 +33,6 @@ class Test(TestCase):
 
 class TestSimulationResults(TestCase):
     def test_to_string_diff(self):
-
         tsr = SimulationResults(1000, "recent run")
         tsr.probability_bvb_winning_the_champions_league = 0.5
         tsr2 = SimulationResults(1000, "older run")
@@ -43,9 +42,17 @@ class TestSimulationResults(TestCase):
         print(out)
 
     def test_to_string_nodiff(self):
-
         tsr = SimulationResults(1000, "recent run")
         tsr.probability_bvb_winning_the_champions_league = 0.5
 
         out = tsr.format()
         print(out)
+
+
+    def test_diff_value_relevant(self):
+        self.assertTrue(diff_value_relevant(1.5))
+        self.assertTrue(diff_value_relevant(-1.5))
+
+        self.assertFalse(diff_value_relevant(-0.25))
+        self.assertFalse(diff_value_relevant(+0.25))
+        self.assertFalse(diff_value_relevant(0))

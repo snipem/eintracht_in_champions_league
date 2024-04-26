@@ -12,6 +12,7 @@ DRAW = "DRAW"
 BVB = "BVB"
 PSG = "PSG"
 FCB = "FCB"
+FCB2 = "FCB2"
 RM = "RM"
 
 # EL
@@ -42,6 +43,7 @@ team_ovr_rating = {
     BVB: 81,
     PSG: 83,
     FCB: 84,
+    FCB2: 75,
     RM: 85,
     B04: 80,
     AST: 80,
@@ -65,12 +67,17 @@ team_ovr_rating = {
 
 class Match:
 
-    def __init__(self, team1, team2):
+    def __init__(self, team1, team2, outcome=None):
         self.team1 = team1
         self.team2 = team2
-        self.outcome = self.simulate_outcome()
-        if self.outcome == DRAW:
-            self.overtime_winner = self.simulate_overtime_winner()
+
+        if outcome:
+            # Use the known outcome
+            self.outcome = outcome
+        else:
+            self.outcome = self.simulate_outcome()
+            if self.outcome == DRAW:
+                self.overtime_winner = self.simulate_overtime_winner()
 
     def simulate_outcome(self):
         return get_random_outcome(self.team1, self.team2)
@@ -247,7 +254,7 @@ def simulate_bundesliga() -> (int, int):
         # Hoffenheim
         Match(HOF, BOC), Match(HOF, D98), Match(HOF, FCB),  # Direktes Duell gegen Leipzig
         # Freiburg
-        Match(SCF, M05), Match(SCF, WOB), Match(SCF, KOE), Match(SCF, HEI), Match(SCF, BER)
+        Match(SCF, M05, outcome=DRAW), Match(SCF, WOB), Match(SCF, KOE), Match(SCF, HEI), Match(SCF, BER)
     ]
 
     # Get Points for matches
@@ -331,6 +338,18 @@ class SimulationResults:
         obj.start_time = datetime.fromisoformat(data['start_time'])
         obj.end_time = datetime.fromisoformat(data['end_time']) if data['end_time'] else None
         obj.duration = timedelta(seconds=data['duration']) if data['duration'] else None
+
+        probability_eintracht_place_int = {}
+        probability_dortmund_place_int = {}
+
+        for key, value in data['probability_eintracht_place'].items():
+            probability_eintracht_place_int[int(key)] = value
+        for key, value in data['probability_dortmund_place'].items():
+            probability_dortmund_place_int[int(key)] = value
+
+        obj.probability_dortmund_place = probability_dortmund_place_int
+        obj.probability_eintracht_place = probability_eintracht_place_int
+
         return obj
 
     def calculate_probabilities(self, raw_data: SimulationRawData):
@@ -356,18 +375,18 @@ class SimulationResults:
         rs = ""
         rs += "\n```"
         rs += ("Ergebnisse nach %s Simulationen mit Powerranking:\n" % millify(self.nr_of_simulations) +
-               "P BVB gewinnt CL:       %.3f\n" % self.probability_bvb_winning_the_champions_league +
-               "P DFB mit 5. CL Platz:  %.3f\n" % self.probability_fifth_cl_starter_for_germany +
-               "P BVB wird 5.:          %.3f\n" % self.probability_dortmund_place[5] +
-               "P SGE wird 5.:          %.3f\n" % self.probability_eintracht_place[5] +
-               "P SGE wird 6.:          %.3f\n" % self.probability_eintracht_place[6] +
-               "P SGE wird 7.:          %.3f\n" % self.probability_eintracht_place[7] +
-               "P SGE wird 8.:          %.3f\n" % self.probability_eintracht_place[8] +
-               "P SGE wird 9.:          %.3f\n" % self.probability_eintracht_place[9] +
-               "P SGE kommt in die CL:  %.3f\n" % self.probability_eintracht_in_champions_league +
-               "P SGE kommt in die EL:  %.3f\n" % self.probability_eintracht_in_europa_league +
-               "P SGE kommt in die ECL: %.3f\n" % self.probability_eintracht_in_conference_league +
-               "P SGE in Europa 24/25:  %.3f\n" % self.probability_eintracht_in_europa +
+               "P BVB gewinnt CL: %.3f\n" % self.probability_bvb_winning_the_champions_league +
+               "P 5. CL Platz:     %.3f\n" % self.probability_fifth_cl_starter_for_germany +
+               "P BVB wird 5.:     %.3f\n" % self.probability_dortmund_place[5] +
+               "P SGE wird 5.:     %.3f\n" % self.probability_eintracht_place[5] +
+               "P SGE wird 6.:     %.3f\n" % self.probability_eintracht_place[6] +
+               "P SGE wird 7.:     %.3f\n" % self.probability_eintracht_place[7] +
+               "P SGE wird 8.:     %.3f\n" % self.probability_eintracht_place[8] +
+               "P SGE wird 9.:     %.3f\n" % self.probability_eintracht_place[9] +
+               "P SGE in CL:       %.3f\n" % self.probability_eintracht_in_champions_league +
+               "P SGE in EL:       %.3f\n" % self.probability_eintracht_in_europa_league +
+               "P SGE in ECL:      %.3f\n" % self.probability_eintracht_in_conference_league +
+               "P Europacup 24/25: %.3f\n" % self.probability_eintracht_in_europa +
                "```")
 
         return rs
@@ -398,6 +417,14 @@ class SimulationResults:
               "\n```")
         return rs
 
+
+def diff_value_relevant(diff_value: float) -> bool:
+    if abs(diff_value) <= 0.25:
+        return False
+
+    return True
+
+
 def _format_probability(sr: SimulationResults, param, compare_sr: SimulationResults = None):
 
     if isinstance(param, list):
@@ -405,22 +432,34 @@ def _format_probability(sr: SimulationResults, param, compare_sr: SimulationResu
 
             diff_value = sr.__dict__[param[0]][param[1]] - compare_sr.__dict__[param[0]][param[1]]
 
-            if diff_value != 0:
-                return "%.1f%% (%.1f%%)" % (sr.__dict__[param[0]][param[1]]*100, 100*(diff_value))
+            if diff_value_relevant(diff_value):
+
+                if diff_value > 0:
+                    sign = "+"
+                else:
+                    sign = "-"
+
+                return "%03.1f%% (%s%.1f%%)" % (sr.__dict__[param[0]][param[1]]*100, sign, abs(diff_value))
             else:
-                return "%.1f%%" % (sr.__dict__[param[0]][param[1]]*100)
+                return "%03.1f%%" % (sr.__dict__[param[0]][param[1]]*100)
         else:
-            return "%.1f%%" % (sr.__dict__[param[0]][param[1]]*100)
+            return "%03.1f%%" % (sr.__dict__[param[0]][param[1]]*100)
 
 
     if compare_sr:
         diff_value = 100*(sr.__dict__[param] - compare_sr.__dict__[param])
-        if diff_value != 0:
-            return "%.1f%% (%.1f%%)" % (sr.__dict__[param]*100, diff_value)
+        if  diff_value_relevant(diff_value):
+
+            if diff_value > 0:
+                sign = "+"
+            else:
+                sign = "-"
+
+            return "%03.1f%% (%s%.1f%%)" % (sr.__dict__[param]*100, sign, abs(diff_value))
         else:
-            return "%.1f%%" % (sr.__dict__[param]*100)
+            return "%03.1f%%" % (sr.__dict__[param]*100)
     else:
-        return "%.1f%%" % (sr.__dict__[param]*100)
+        return "%03.1f%%" % (sr.__dict__[param]*100)
 
 
 def run():
@@ -428,10 +467,19 @@ def run():
         print("Usage: python sim.py <nr_of_simulations> <optional_description>")
         sys.exit(1)
 
-    if len(sys.argv) == 3:
+    if len(sys.argv) >= 3:
         description = sys.argv[2]
     else:
         description = ""
+
+    if len(sys.argv) == 4:
+        history_filename = sys.argv[3]
+        print(history_filename)
+        with open(history_filename, 'r') as file:
+            data = file.read().rstrip()
+            history_file = SimulationResults.from_json(data)
+    else:
+        history_file = None
 
     nr_of_simulations = int(sys.argv[1])
 
@@ -522,7 +570,7 @@ def run():
 
     simulation_results.end()
     simulation_results.calculate_probabilities(raw_data)
-    print(simulation_results.to_string())
+    print(simulation_results.format(diff=history_file))
 
     # Serialize to JSON
     json_data = simulation_results.to_json()
@@ -530,8 +578,6 @@ def run():
     with open(filename, "w") as text_file:
         text_file.write(json_data)
 
-    # # Deserialize from JSON
-    # sim_results_deserialized = SimulationResults.from_json(json_data)
 
 
 def millify(n):
