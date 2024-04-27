@@ -244,17 +244,17 @@ def simulate_bundesliga() -> (int, int):
     matches = [
         # End of 30. Spieltag
         # Leipzig
-        Match(RBL, BVB), Match(RBL, HOF), Match(RBL, WER), Match(RBL, SGE),
+        Match(RBL, BVB, outcome=RBL), Match(RBL, HOF), Match(RBL, WER), Match(RBL, SGE),
         # Dortmund
         Match(BVB, FCA), Match(BVB, M05), Match(BVB, D98),  # Direktes Duell gegen Leipzig
         # Eintracht
-        Match(SGE, FCB), Match(SGE, B04), Match(SGE, BMG),  # Direktes Duell gegen Leipzig
+        Match(SGE, FCB, outcome=FCB), Match(SGE, B04), Match(SGE, BMG),  # Direktes Duell gegen Leipzig
         # Augsburg
-        Match(FCA, WER), Match(FCA, VFB), Match(FCA, B04),  # Direktes Duell gegen Dortmund
+        Match(FCA, WER, outcome=WER), Match(FCA, VFB), Match(FCA, B04),  # Direktes Duell gegen Dortmund
         # Hoffenheim
         Match(HOF, BOC, outcome=BOC), Match(HOF, D98), Match(HOF, FCB),  # Direktes Duell gegen Leipzig
         # Freiburg
-        Match(SCF, M05, outcome=DRAW), Match(SCF, WOB), Match(SCF, KOE), Match(SCF, HEI), Match(SCF, BER)
+        Match(SCF, M05, outcome=DRAW), Match(SCF, WOB, outcome=WOB), Match(SCF, KOE), Match(SCF, HEI), Match(SCF, BER)
     ]
 
     # Get Points for matches
