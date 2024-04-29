@@ -1,5 +1,7 @@
 # eintracht_in_champions_league
 
+[![Latest Simulation Run](https://github.com/snipem/eintracht_in_champions_league/actions/workflows/python-app.yml/badge.svg)](https://github.com/snipem/eintracht_in_champions_league/actions/workflows/python-app.yml)
+
 A simulation for the multiple dependencies for Eintracht Frankfurt playing in Champions League or any European Cup in 2024/2025.
 
 ```
