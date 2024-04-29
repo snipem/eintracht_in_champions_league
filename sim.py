@@ -383,7 +383,8 @@ class SimulationResults:
             rs += "Vergleich '%s' vom %s\n" % (diff.description, diff.start_time.strftime("%d.%m. %H:%M"))
 
 
-        rs += ("\nP BVB gewinnt CL: " + _format_probability(self, "probability_bvb_winning_the_champions_league", diff) +
+        rs += (
+              "\nP BVB gewinnt CL:  " + _format_probability(self, "probability_bvb_winning_the_champions_league", diff) +
               "\nP 5. CL Platz:     " + _format_probability(self, "probability_fifth_cl_starter_for_germany", diff) +
               "\nP BVB wird 5.:     " + _format_probability(self, ["probability_dortmund_place",5], diff) +
               "\nP SGE wird 5.:     " + _format_probability(self, ["probability_eintracht_place",5], diff) +

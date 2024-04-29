@@ -5,7 +5,7 @@ A simulation for the multiple dependencies for Eintracht Frankfurt playing in Ch
 ```
 Ergebnisse nach 1 Millionen Simulationen mit Powerranking:
 Lauf 'Workflow-Run' vom 29.04. 08:42
-P BVB gewinnt CL: 17.7%
+P BVB gewinnt CL:  17.7%
 P 5. CL Platz:     95.7%
 P BVB wird 5.:     93.0%
 P SGE wird 5.:     0.0%
