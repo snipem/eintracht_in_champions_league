@@ -25,4 +25,4 @@ jobs:
         python-version: "3.10"
     - name: Run
       run: |
-        python sim.py 1000000 "Workflow-Run"
+        python sim.py 1000000 "Automatischer Run" "$(find results | tail -n1)"

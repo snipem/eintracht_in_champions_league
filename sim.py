@@ -38,7 +38,9 @@ WOB = "WOB"
 KOE = "KOE"
 HEI = "HEI"
 BER = "BER"
+FCK = "FCK"
 
+# https://www.fifaindex.com/de/teams/fifa24/
 team_ovr_rating = {
     BVB: 81,
     PSG: 83,
@@ -62,6 +64,7 @@ team_ovr_rating = {
     KOE: 72,
     HEI: 74,
     BER: 74,
+    FCK: 69,
 }
 
 
@@ -286,6 +289,7 @@ class SimulationRawData:
     def __init__(self):
         self.cl_winner = []
         self.fifth_cl_place_for_germany = []
+        self.dfb_pokal_winner = []
         self.eintracht_place = []
         self.dortmund_place = []
         self.eintracht_in_champions_league = []
@@ -359,6 +363,8 @@ class SimulationResults:
         self.probability_eintracht_in_champions_league = raw_data.eintracht_in_champions_league.count(
             True) / self.nr_of_simulations
 
+        self.probability_b04_wins_dfb_pokal = raw_data.dfb_pokal_winner.count(B04) / self.nr_of_simulations
+
         self.probability_eintracht_in_europa_league = raw_data.eintracht_in_europa_league.count(
             True) / self.nr_of_simulations
         self.probability_eintracht_in_conference_league = raw_data.eintracht_in_conference_league.count(
@@ -386,6 +392,7 @@ class SimulationResults:
         rs += (
               "\nP BVB gewinnt CL:  " + _format_probability(self, "probability_bvb_winning_the_champions_league", diff) +
               "\nP 5. CL Platz:     " + _format_probability(self, "probability_fifth_cl_starter_for_germany", diff) +
+              "\nP B04 holt Pokal:  " + _format_probability(self, "probability_b04_wins_dfb_pokal", diff) +
               "\nP BVB wird 5.:     " + _format_probability(self, ["probability_dortmund_place",5], diff) +
               "\nP SGE wird 5.:     " + _format_probability(self, ["probability_eintracht_place",5], diff) +
               "\nP SGE wird 6.:     " + _format_probability(self, ["probability_eintracht_place",6], diff) +
@@ -493,6 +500,11 @@ def run():
         _, points_for_england_in_chl = simulate_cup(AST, "Team2", "Team3", "Team4")
         points_for_england += points_for_england_in_chl
 
+        # DFB Pokal
+        dfb_pokal_winner = Match(B04, FCK).simulate_overtime_winner()
+
+        # Points calculation
+
         if points_for_germany > 4:
             germany_has_5th_cl_place = True
         elif points_for_england < 4:
@@ -512,6 +524,10 @@ def run():
         # Setup europa places
         el_place = 5
         ecl_place = 6
+
+        if dfb_pokal_winner == B04:
+            el_place += 1
+            ecl_place += 1
 
         if cl_winner == BVB and germany_has_5th_cl_place and dortmund_place >= 5:
             el_place += 2
@@ -540,6 +556,7 @@ def run():
             eintracht_in_europa = True
 
         raw_data.cl_winner.append(cl_winner)
+        raw_data.dfb_pokal_winner.append(dfb_pokal_winner)
 
         raw_data.eintracht_place.append(eintracht_place)
         raw_data.dortmund_place.append(dortmund_place)
@@ -556,7 +573,7 @@ def run():
 
     # Serialize to JSON
     json_data = simulation_results.to_json()
-    filename = "results/sim_result_%s_%s.json" % (simulation_results.start_time, simulation_results.revision)
+    filename = "results/sim_result_%s_%s.json" % (simulation_results.start_time.isoformat(), simulation_results.revision)
     with open(filename, "w") as text_file:
         text_file.write(json_data)
 
