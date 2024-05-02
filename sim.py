@@ -1,5 +1,7 @@
 import json
 import locale
+from typing import List
+
 import math
 import random
 import subprocess
@@ -487,17 +489,44 @@ def run():
         points_for_germany = 0
         points_for_england = 0
 
-        cl_winner, points_for_germany_in_cl = simulate_cup(BVB, PSG, FCB, RM)
+        cl_winner, points_for_germany_in_cl = simulate_cup(
+            [
+                Match(BVB, PSG, outcome=BVB),
+                Match(BVB, PSG),
+            ],
+            [
+                Match(FCB, RM, outcome=DRAW),
+                Match(FCB, RM),
+            ],
+        )
         points_for_germany += points_for_germany_in_cl
 
         if debug:
             print(i, cl_winner, points_for_germany)
 
         # EL
-        _, points_for_germany_in_el = simulate_cup(B04, "Team2", "Team3", "Team4")
+        _, points_for_germany_in_el = simulate_cup(
+            [
+                Match(B04, "ASR"),
+                Match(B04, "ASR"),
+            ],
+            [
+                Match("Team3", "Team4"),
+                Match("Team3", "Team4"),
+            ],
+        )
         points_for_germany += points_for_germany_in_el
 
-        _, points_for_england_in_chl = simulate_cup(AST, "Team2", "Team3", "Team4")
+        _, points_for_england_in_chl = simulate_cup(
+            [
+                Match(AST, "Team5"),
+                Match(AST, "Team5"),
+            ],
+            [
+                Match("Team6", "Team7"),
+                Match("Team6", "Team7"),
+            ],
+        )
         points_for_england += points_for_england_in_chl
 
         # DFB Pokal
@@ -588,16 +617,11 @@ def millify(n):
     return '{:.0f}{}'.format(n / 10 ** (3 * millidx), millnames[millidx])
 
 
-def simulate_cup(team1, team2, team3, team4):
-    points_for_germany = 0
-    cl_matchces = []
-    # Champions League
-    m1 = Match(team1, team2)
-    m2 = Match(team3, team4)
-    m3 = Match(team1, team2)
-    m4 = Match(team3, team4)
-    final_team_1 = who_goes_to_next_round(m1, m3)
-    final_team_2 = who_goes_to_next_round(m2, m4)
+def simulate_cup(semifinal1: List[Match], semifinal2: List[Match]):
+
+    final_team_1 = who_goes_to_next_round(semifinal1[0], semifinal1[1])
+    final_team_2 = who_goes_to_next_round(semifinal2[0], semifinal2[1])
+
     cl_final = Match(final_team_1, final_team_2)
 
     if is_german_team(final_team_1):
@@ -605,13 +629,13 @@ def simulate_cup(team1, team2, team3, team4):
     if is_german_team(final_team_2):
         points_for_germany = + 1
 
-    cl_matchces = [m1, m2, m3, m4]
+    cl_matches = semifinal1 + semifinal2
     if cl_final.outcome == DRAW:
         cl_winner = cl_final.overtime_winner
     else:
         cl_winner = cl_final.outcome
 
-    points_for_germany = get_points_for_germany_by_matches(cl_matchces)
+    points_for_germany = get_points_for_germany_by_matches(cl_matches)
 
     if is_german_team(cl_winner):
         points_for_germany = + 2
