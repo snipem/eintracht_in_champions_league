@@ -534,12 +534,15 @@ def run():
 
         # Points calculation
 
-        if points_for_germany > 4:
-            germany_has_5th_cl_place = True
-        elif points_for_england < 4:
-            germany_has_5th_cl_place = True
-        else:  # TODO add france
-            germany_has_5th_cl_place = False
+        # UEFA says so
+        germany_has_5th_cl_place = True
+
+        # if points_for_germany >= 4:
+        #     germany_has_5th_cl_place = True
+        # elif points_for_england <= 4:
+        #     germany_has_5th_cl_place = True
+        # else:  # TODO add france
+        #     germany_has_5th_cl_place = False
 
         i += 1
 
