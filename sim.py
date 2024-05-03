@@ -249,7 +249,7 @@ def simulate_bundesliga() -> (int, int):
     matches = [
         # End of 30. Spieltag
         # Leipzig
-        Match(RBL, BVB, outcome=RBL), Match(RBL, HOF), Match(RBL, WER), Match(RBL, SGE),
+        Match(RBL, BVB, outcome=RBL), Match(RBL, HOF, outcome=DRAW), Match(RBL, WER), Match(RBL, SGE),
         # Dortmund
         Match(BVB, FCA), Match(BVB, M05), Match(BVB, D98),  # Direktes Duell gegen Leipzig
         # Eintracht
