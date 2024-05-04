@@ -609,7 +609,7 @@ def run():
 
     # Serialize to JSON
     json_data = simulation_results.to_json()
-    filename = "results/sim_result_%s_%s.json" % (simulation_results.start_time.isoformat(), simulation_results.revision)
+    filename = "results/sim_result_%s_%s.json" % (simulation_results.start_time.isoformat().replace(":", "_"), simulation_results.revision)
     with open(filename, "w") as text_file:
         text_file.write(json_data)
 
