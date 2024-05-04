@@ -255,7 +255,7 @@ def simulate_bundesliga() -> (int, int):
         # Leipzig
         Match(RBL, BVB, outcome=RBL), Match(RBL, HOF, outcome=DRAW), Match(RBL, WER), Match(RBL, SGE),
         # Dortmund
-        Match(BVB, FCA), Match(BVB, M05), Match(BVB, D98),  # Direktes Duell gegen Leipzig
+        Match(BVB, FCA, outcome=BVB), Match(BVB, M05), Match(BVB, D98),  # Direktes Duell gegen Leipzig
         # Eintracht
         Match(SGE, FCB, outcome=FCB), Match(SGE, B04), Match(SGE, BMG),  # Direktes Duell gegen Leipzig
         # Augsburg
