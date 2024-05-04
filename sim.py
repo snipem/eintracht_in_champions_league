@@ -232,6 +232,10 @@ def simulate_bundesliga() -> (int, int):
 
     # 21.04.24
     top_standing_in_this_list = 4
+
+    # This is the base table for all relevant teams to determine the final season standings.
+    # Do not update the points, update the floating number for relative goal difference
+    # .9 is better than .7 but not as good as .9 vs .1
     standings = {
         RBL: 59.9,
         BVB: 57.7,
