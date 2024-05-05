@@ -263,7 +263,7 @@ def simulate_bundesliga() -> (int, int):
         # Hoffenheim
         Match(HOF, BOC, outcome=BOC), Match(HOF, D98), Match(HOF, FCB),  # Direktes Duell gegen Leipzig
         # Freiburg
-        Match(SCF, M05, outcome=DRAW), Match(SCF, WOB, outcome=WOB), Match(SCF, KOE), Match(SCF, HEI), Match(SCF, BER)
+        Match(SCF, M05, outcome=DRAW), Match(SCF, WOB, outcome=WOB), Match(SCF, KOE, outcome=DRAW), Match(SCF, HEI), Match(SCF, BER)
     ]
 
     # Get Points for matches
@@ -565,12 +565,17 @@ def run():
             el_place += 1
             ecl_place += 1
 
-        if cl_winner == BVB and germany_has_5th_cl_place and dortmund_place >= 5:
-            el_place += 2
-            ecl_place += 2
-        elif germany_has_5th_cl_place:
+        # Does not make a difference for EL and ECL. Goes back to UEFA
+        # if cl_winner == BVB and germany_has_5th_cl_place and dortmund_place >= 5:
+        #     el_place += 1
+        #     ecl_place += 1
+        if germany_has_5th_cl_place:
             el_place += 1
             ecl_place += 1
+
+        if debug:
+            print("EL place: %d" % el_place)
+            print("ECL place: %d" % ecl_place)
 
         eintracht_in_champions_league = False
         eintracht_in_europa_league = False
