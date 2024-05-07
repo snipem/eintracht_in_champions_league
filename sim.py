@@ -496,7 +496,7 @@ def run():
         cl_winner, points_for_germany_in_cl = simulate_cup(
             [
                 Match(BVB, PSG, outcome=BVB),
-                Match(BVB, PSG),
+                Match(BVB, PSG, outcome=BVB),
             ],
             [
                 Match(FCB, RM, outcome=DRAW),
