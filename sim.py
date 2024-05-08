@@ -500,7 +500,7 @@ def run():
             ],
             [
                 Match(FCB, RM, outcome=DRAW),
-                Match(FCB, RM),
+                Match(FCB, RM, outcome=RM),
             ],
         )
         points_for_germany += points_for_germany_in_cl
